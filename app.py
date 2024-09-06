@@ -33,7 +33,7 @@ def load_excel_data():
     # Extract sections from the dictionary
     area_of_practice = section_headers['AREA OF PRACTICE']
     age_client_type = section_headers['AGE/ CLIENT TYPE']
-    interventions = section_headers['INTERVENTIONS']
+    interventions = section_headers['INTERVENTIONS'] 
     areas_of_work = section_headers['AREAS OF WORK'] 
     
     # Extract clinician names (columns)
