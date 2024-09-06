@@ -1,13 +1,24 @@
-from flask import Flask, render_template, request
+import requests
 import pandas as pd
+from flask import Flask, render_template, request
+from io import StringIO  # Correct import for handling text data
 
 app = Flask(__name__)
 
-# Load the Excel file and extract dropdown options
+# Load the Google Sheets data from the CSV export link
 def load_excel_data():
-    file_path = "therapist matching.xlsx"  # Update with your actual file path
-    df = pd.read_excel(file_path, sheet_name="Sheet1")
-    
+    # Google Sheets CSV export link
+    file_url = "https://docs.google.com/spreadsheets/d/1leIVHKD7O2rIXeTTT7wDMht_USxL9X2U/export?format=csv"
+
+    # Request the CSV file from Google Sheets
+    response = requests.get(file_url)
+
+    if response.status_code == 200:
+        # Read the CSV file into a pandas DataFrame directly from text using StringIO
+        df = pd.read_csv(StringIO(response.text))
+    else:
+        raise Exception(f"Failed to download the file from Google Sheets: {response.status_code}")
+
     # Define section headers that indicate the start of each section
     section_headers = {
         'AREA OF PRACTICE': [],
@@ -20,7 +31,7 @@ def load_excel_data():
     current_category = None
     for i, row in df.iterrows():
         first_cell = str(row['CLINICIAN']).strip()
-        
+
         # Check if the row contains a section header
         if first_cell in section_headers:
             current_category = first_cell
@@ -32,9 +43,9 @@ def load_excel_data():
 
     # Extract sections from the dictionary
     area_of_practice = section_headers['AREA OF PRACTICE']
-    age_client_type = section_headers['AGE/ CLIENT TYPE'] 
-    interventions = section_headers['INTERVENTIONS'] 
-    areas_of_work = section_headers['AREAS OF WORK'] 
+    age_client_type = section_headers['AGE/ CLIENT TYPE']
+    interventions = section_headers['INTERVENTIONS']
+    areas_of_work = section_headers['AREAS OF WORK']
     
     # Extract clinician names (columns)
     clinicians = df.columns[1:].tolist()  # Skip the first "CLINICIAN" column
@@ -50,17 +61,20 @@ def load_excel_data():
 # Calculate clinician ratings based on selected categories
 def calculate_ratings(df, selected_area, selected_age, selected_intervention, selected_work_area, clinicians):
     clinician_scores = {}
-    
+
+    # Convert all columns that contain numerical ratings to numeric type (int or float)
+    df[clinicians] = df[clinicians].apply(pd.to_numeric, errors='coerce')  # Convert columns to numeric
+
     # Find the indices for the selected rows in the dataframe
     area_index = df[df['CLINICIAN'] == selected_area].index[0] if selected_area != "Select Area of Practice" else None
     age_index = df[df['CLINICIAN'] == selected_age].index[0] if selected_age != "Select Age/ Client Type" else None
     intervention_index = df[df['CLINICIAN'] == selected_intervention].index[0] if selected_intervention != "Select Intervention" else None
     work_area_index = df[df['CLINICIAN'] == selected_work_area].index[0] if selected_work_area != "Select Area of Work" else None
-    
+
     for clinician in clinicians:
         score_sum = 0
         category_count = 0
-        
+
         # Check Area of Practice: 0 excludes, 10 includes but doesn't affect score
         if area_index is not None:
             area_score = df.iloc[area_index][clinician]
