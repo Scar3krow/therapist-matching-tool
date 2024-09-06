@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clinician Matching Tool</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 60%;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        form {
+            margin-bottom: 20px;
+        }
+
+        select, button {
+            width: 50%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        tr:hover {
+            background-color: #ddd;
+        }
+
+        td {
+            font-size: 18px;
+        }
+
+        .result-table {
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Clinician Matching Tool</h1>
+        <form action="/match" method="POST">
+            <!-- Area of Practice Dropdown -->
+            <select id="area" name="area">
+                {% for area in areas %}
+                <option value="{{ area }}">{{ area }}</option>
+                {% endfor %}
+            </select>
+            <br>
+
+            <!-- Age/Client Type Dropdown -->
+            <select id="age" name="age">
+                {% for age in ages %}
+                <option value="{{ age }}">{{ age }}</option>
+                {% endfor %}
+            </select>
+            <br>
+
+            <!-- Intervention Dropdown -->
+            <select id="intervention" name="intervention">
+                {% for intervention in interventions %}
+                <option value="{{ intervention }}">{{ intervention }}</option>
+                {% endfor %}
+            </select>
+            <br>
+
+            <!-- Area of Work Dropdown -->
+            <select id="work_area" name="work_area">
+                {% for work_area in work_areas %}
+                <option value="{{ work_area }}">{{ work_area }}</option>
+                {% endfor %}
+            </select>
+            <br>
+
+            <button type="submit">Find Best Clinician</button>
+        </form>
+    </div>
+</body>
+</html>
