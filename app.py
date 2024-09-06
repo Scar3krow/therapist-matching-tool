@@ -65,11 +65,11 @@ def calculate_ratings(df, selected_area, selected_age, selected_intervention, se
     # Convert all columns that contain numerical ratings to numeric type (int or float)
     df[clinicians] = df[clinicians].apply(pd.to_numeric, errors='coerce')  # Convert columns to numeric
 
-    # Find the indices for the selected rows in the dataframe
-    area_index = df[df['CLINICIAN'] == selected_area].index[0] if selected_area != "Select Area of Practice" else None
-    age_index = df[df['CLINICIAN'] == selected_age].index[0] if selected_age != "Select Age/ Client Type" else None
-    intervention_index = df[df['CLINICIAN'] == selected_intervention].index[0] if selected_intervention != "Select Intervention" else None
-    work_area_index = df[df['CLINICIAN'] == selected_work_area].index[0] if selected_work_area != "Select Area of Work" else None
+    # Safely find the indices for the selected rows in the dataframe
+    area_index = df[df['CLINICIAN'] == selected_area].index[0] if not df[df['CLINICIAN'] == selected_area].empty and selected_area != "Select Area of Practice" else None
+    age_index = df[df['CLINICIAN'] == selected_age].index[0] if not df[df['CLINICIAN'] == selected_age].empty and selected_age != "Select Age/ Client Type" else None
+    intervention_index = df[df['CLINICIAN'] == selected_intervention].index[0] if not df[df['CLINICIAN'] == selected_intervention].empty and selected_intervention != "Select Intervention" else None
+    work_area_index = df[df['CLINICIAN'] == selected_work_area].index[0] if not df[df['CLINICIAN'] == selected_work_area].empty and selected_work_area != "Select Area of Work" else None
 
     for clinician in clinicians:
         score_sum = 0
@@ -105,7 +105,7 @@ def calculate_ratings(df, selected_area, selected_age, selected_intervention, se
                 continue  # Exclude clinicians with 0 score
             score_sum += work_area_score
             category_count += 1
-        
+
         # Calculate the average score (sum divided by the number of selected categories)
         if category_count > 0:
             average_score = score_sum / category_count
@@ -113,6 +113,8 @@ def calculate_ratings(df, selected_area, selected_age, selected_intervention, se
     
     # Sort clinicians by their scores in descending order
     ranked_clinicians = sorted(clinician_scores.items(), key=lambda x: x[1], reverse=True)
+    
+    # Return the ranked clinicians list, which might be empty
     return ranked_clinicians
 
 @app.route('/')
@@ -136,6 +138,15 @@ def match():
     # Load data and calculate clinician ratings
     df, area_of_practice, age_client_type, interventions, areas_of_work, clinicians = load_excel_data()
     ranked_clinicians = calculate_ratings(df, selected_area, selected_age, selected_intervention, selected_work_area, clinicians)
+
+    if not ranked_clinicians:
+        message = "No Qualified Therapists Available"
+        return render_template('match.html', 
+                               area=selected_area, 
+                               age=selected_age, 
+                               intervention=selected_intervention, 
+                               work_area=selected_work_area,
+                               message=message)
 
     return render_template('match.html', 
                            area=selected_area, 

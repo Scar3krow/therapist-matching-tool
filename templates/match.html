@@ -78,28 +78,38 @@
         .back-button {
             margin-top: 20px;
         }
+
+        .message {
+            color: red;
+            font-size: 20px;
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Matching Results</h1>
 
-        <table class="result-table">
-            <thead>
-                <tr>
-                    <th>Clinician</th>
-                    <th>Score</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for clinician, score in ranked_clinicians %}
-                <tr>
-                    <td>{{ clinician }}</td>
-                    <td>{{ score }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        {% if message %}
+            <p class="message">{{ message }}</p>
+        {% else %}
+            <table class="result-table">
+                <thead>
+                    <tr>
+                        <th>Clinician</th>
+                        <th>Score</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for clinician, score in ranked_clinicians %}
+                    <tr>
+                        <td>{{ clinician }}</td>
+                        <td>{{ score }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
 
         <div class="back-button">
             <a href="/">
