@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Matching Results</title>
+    <title>{{ clinician_name }} - Ratings</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -57,7 +57,7 @@
             font-size: 18px;
         }
 
-        .result-table {
+        .rating-table {
             margin-top: 30px;
         }
 
@@ -79,43 +79,36 @@
             margin-top: 20px;
         }
 
-        .message {
-            color: red;
-            font-size: 20px;
-            margin-top: 20px;
+        .back-button a {
+            margin-right: 10px;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Matching Results</h1>
+        <h1>{{ clinician_name }} - Ratings</h1>
 
-        {% if message %}
-            <p class="message">{{ message }}</p>
-        {% else %}
-            <table class="result-table">
-                <thead>
-                    <tr>
-                        <th>Clinician</th>
-                        <th>Score</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for clinician, score in ranked_clinicians %}
-                    <tr>
-                        <td>
-                            <a href="{{ url_for('clinician_details', clinician_name=clinician, area=area, age=age, intervention=intervention, work_area_1=work_areas[0], work_area_2=work_areas[1], work_area_3=work_areas[2]) }}">
-                                {{ clinician }}
-                            </a>
-                        </td>
-                        <td>{{ score }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        {% endif %}
+        <table class="rating-table">
+            <thead>
+                <tr>
+                    <th>Category</th>
+                    <th>Rating</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for category, rating in clinician_ratings.items() %}
+                <tr>
+                    <td>{{ category }}</td> <!-- Shows the actual category name -->
+                    <td>{{ rating }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
 
         <div class="back-button">
+            <a href="/match">
+                <button type="button">Back to Results</button>
+            </a>
             <a href="/">
                 <button type="button">Back to Home</button>
             </a>

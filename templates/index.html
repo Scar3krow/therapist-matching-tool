@@ -113,13 +113,27 @@
             </select>
             <br>
 
-            <!-- Area of Work Dropdown -->
-            <select id="work_area" name="work_area">
+            <!-- Area of Work Dropdowns -->
+            <select name="work_area_1" id="work_area_1">
                 {% for work_area in work_areas %}
                 <option value="{{ work_area }}">{{ work_area }}</option>
                 {% endfor %}
             </select>
-            <br>
+            <br><br>
+        
+            <select name="work_area_2" id="work_area_2">
+                {% for work_area in work_areas %}
+                <option value="{{ work_area }}">{{ work_area }}</option>
+                {% endfor %}
+            </select>
+            <br><br>
+
+            <select name="work_area_3" id="work_area_3">
+                {% for work_area in work_areas %}
+                <option value="{{ work_area }}">{{ work_area }}</option>
+                {% endfor %}
+            </select>
+            <br><br>
 
             <button type="submit">Find Best Clinician</button>
         </form>
