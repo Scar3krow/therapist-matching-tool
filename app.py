@@ -62,6 +62,7 @@ def load_excel_data():
 # Calculate clinician ratings based on selected categories
 def calculate_ratings(df, selected_area, selected_age, selected_intervention, selected_work_areas, clinicians):
     clinician_scores = {}
+    detailed_scores = {}  # To store detailed scores for each clinician
 
     # Convert all columns that contain numerical ratings to numeric type (int or float)
     df[clinicians] = df[clinicians].apply(pd.to_numeric, errors='coerce')  # Convert columns to numeric
@@ -81,6 +82,15 @@ def calculate_ratings(df, selected_area, selected_age, selected_intervention, se
         score_sum = 0
         category_count = 0
 
+        # Store detailed scores for this clinician
+        clinician_details = {
+            'age_score': 0,
+            'intervention_score': 0,
+            'work_area_1_score': 0,
+            'work_area_2_score': 0,
+            'work_area_3_score': 0
+        }
+
         # Check Area of Practice: Exclude clinician if Area of Practice score is 0
         if area_index is not None:
             area_score = df.iloc[area_index][clinician]
@@ -94,6 +104,7 @@ def calculate_ratings(df, selected_area, selected_age, selected_intervention, se
             age_score = df.iloc[age_index][clinician]
             if age_score == 0:
                 continue  # Exclude clinicians with 0 score
+            clinician_details['age_score'] = age_score  # Store age score
             score_sum += age_score
             category_count += 1
 
@@ -102,13 +113,14 @@ def calculate_ratings(df, selected_area, selected_age, selected_intervention, se
             intervention_score = df.iloc[intervention_index][clinician]
             if intervention_score == 0:
                 continue  # Exclude clinicians with 0 score
+            clinician_details['intervention_score'] = intervention_score  # Store intervention score
             score_sum += intervention_score
             category_count += 1
 
         # Check and add scores for the selected areas of work but include the 0 score in average
-        for work_area_index in work_area_indices:
+        for idx, work_area_index in enumerate(work_area_indices):
             work_area_score = df.iloc[work_area_index][clinician]
-            # Include the score even if it's 0
+            clinician_details[f'work_area_{idx+1}_score'] = work_area_score  # Store work area score
             score_sum += work_area_score
             category_count += 1
 
@@ -116,6 +128,7 @@ def calculate_ratings(df, selected_area, selected_age, selected_intervention, se
         if category_count > 0:
             average_score = score_sum / category_count
             clinician_scores[clinician] = round(average_score, 2)
+            detailed_scores[clinician] = clinician_details  # Store detailed scores for this clinician
 
     # Sort clinicians by their scores in descending order
     ranked_clinicians = sorted(clinician_scores.items(), key=lambda x: x[1], reverse=True)
@@ -123,9 +136,8 @@ def calculate_ratings(df, selected_area, selected_age, selected_intervention, se
     # Limit the results to a maximum of 8 clinicians
     ranked_clinicians = ranked_clinicians[:8]
 
-    # Return the ranked clinicians list, which might be empty
-    return ranked_clinicians
-
+    # Return the ranked clinicians list and detailed scores for each clinician
+    return ranked_clinicians, detailed_scores
 
 @app.route('/')
 def index():
@@ -164,7 +176,7 @@ def match():
 
     # Load the data and calculate the clinician ratings
     df, area_of_practice, age_client_type, interventions, areas_of_work, clinicians = load_excel_data()
-    ranked_clinicians = calculate_ratings(df, selected_area, selected_age, selected_intervention, selected_work_areas, clinicians)
+    ranked_clinicians, detailed_scores = calculate_ratings(df, selected_area, selected_age, selected_intervention, selected_work_areas, clinicians)
 
     if not ranked_clinicians:
         message = "No Qualified Therapists Available"
@@ -180,7 +192,8 @@ def match():
                            age=selected_age, 
                            intervention=selected_intervention, 
                            work_areas=selected_work_areas,
-                           ranked_clinicians=ranked_clinicians)
+                           ranked_clinicians=ranked_clinicians,
+                           detailed_scores=detailed_scores)
 
 @app.route('/clinician/<clinician_name>')
 def clinician_details(clinician_name):

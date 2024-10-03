@@ -6,10 +6,10 @@
     <title>Clinician Matching Tool</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Montserrat', sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #f4f4f4;
+            background-color: #f0f0f5;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -18,183 +18,217 @@
 
         .container {
             background-color: white;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
             text-align: center;
-            width: 60%;
+            width: 70%;
+            max-width: 900px;
         }
 
         h1 {
-            color: #333;
+            color: #4A90E2;
+            font-size: 32px;
+            margin-bottom: 20px;
+            font-weight: 700;
         }
 
         form {
             margin-bottom: 20px;
         }
 
-        select, button {
-            width: 50%;
+        .input-group {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        select, button, input[type="text"] {
+            width: 70%;
             padding: 10px;
             margin: 10px 0;
-            border: 1px solid #ddd;
-            border-radius: 5px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
             font-size: 16px;
+            background-color: #fafafa;
+            outline: none;
+        }
+
+        input[type="text"] {
+            width: 20%;
+            padding: 8px;
+            margin-right: 10px;
+        }
+
+        select:focus, input[type="text"]:focus {
+            border-color: #4CAF50;
         }
 
         button {
             background-color: #4CAF50;
             color: white;
             cursor: pointer;
+            border: none;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+            padding: 10px 20px;
+            border-radius: 10px;
         }
 
         button:hover {
-            background-color: #45a049;
+            background-color: #388E3C;
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-
-        th, td {
-            padding: 12px;
-            text-align: center;
-        }
-
-        th {
-            background-color: #4CAF50;
-            color: white;
-        }
-
-        tr:nth-child(even) {
-            background-color: #f2f2f2;
-        }
-
-        tr:hover {
-            background-color: #ddd;
-        }
-
-        td {
+        label {
+            font-weight: 500;
             font-size: 18px;
+            color: #333;
         }
 
-        .result-table {
-            margin-top: 30px;
+        ul.suggestions {
+            background-color: #fff;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            list-style: none;
+            margin: 5px 0;
+            padding: 0;
+            width: 70%;
+            position: absolute;
+            z-index: 100;
+            display: none;  /* Hidden by default */
+            max-height: 300px;  /* Limit to 8 options (assuming about 25px per item) */
+            overflow-y: auto;   /* Enable scroll when items exceed max height */
+        }
+
+        ul.suggestions li {
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        ul.suggestions li:hover {
+            background-color: #E0F7FA;
+        }
+
+        .input-group select {
+            width: calc(80% - 20px); /* Adjust width to account for search bar */
         }
     </style>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="container">
         <h1>Clinician Matching Tool</h1>
         <form action="/match" method="POST">
             <!-- Area of Practice Dropdown -->
-            <select id="area" name="area">
-                {% for area in areas %}
-                <option value="{{ area }}">{{ area }}</option>
-                {% endfor %}
-            </select>
-            <br>
+            <div class="input-group">
+                <select id="area" name="area">
+                    {% for area in areas %}
+                    <option value="{{ area }}">{{ area }}</option>
+                    {% endfor %}
+                </select>
+            </div>
 
             <!-- Age/Client Type Dropdown -->
-            <select id="age" name="age">
-                {% for age in ages %}
-                <option value="{{ age }}">{{ age }}</option>
-                {% endfor %}
-            </select>
-            <br>
+            <div class="input-group">
+                <select id="age" name="age">
+                    {% for age in ages %}
+                    <option value="{{ age }}">{{ age }}</option>
+                    {% endfor %}
+                </select>
+            </div>
 
             <!-- Intervention Dropdown -->
-            <select id="intervention" name="intervention">
-                {% for intervention in interventions %}
-                <option value="{{ intervention }}">{{ intervention }}</option>
-                {% endfor %}
-            </select>
-            <br>
+            <div class="input-group">
+                <select id="intervention" name="intervention">
+                    {% for intervention in interventions %}
+                    <option value="{{ intervention }}">{{ intervention }}</option>
+                    {% endfor %}
+                </select>
+            </div>
 
-            <!-- Area of Work Dropdowns -->
-            <label for="work_area_1">Select Area of Work 1:</label>
-            <input type="text" id="work_area_search_1" placeholder="Search for an area of work..." onkeyup="filterWorkAreas()">
-            <select name="work_area_1" id="work_area_1">
-                {% for work_area in work_areas %}
-                <option value="{{ work_area }}">{{ work_area }}</option>
-                {% endfor %}
-            </select>
-            <br><br>
-        
-            <label for="work_area_2">Select Area of Work 2:</label>
-            <input type="text" id="work_area_search_2" placeholder="Search for an area of work..." onkeyup="filterWorkAreas()">
-            <select name="work_area_2" id="work_area_2">
-                {% for work_area in work_areas %}
-                <option value="{{ work_area }}">{{ work_area }}</option>
-                {% endfor %}
-            </select>
-            <br><br>
+            <!-- Area of Work 1 with search -->
+            <div class="input-group">
+                <input type="text" id="work_area_search_1" placeholder="Search" onkeyup="showSuggestions('work_area_1', 'work_area_search_1')">
+                <select name="work_area_1" id="work_area_1">
+                    {% for work_area in work_areas %}
+                    <option value="{{ work_area }}">{{ work_area }}</option>
+                    {% endfor %}
+                </select>
+                <ul class="suggestions" id="suggestions_1"></ul>
+            </div>
 
-            <label for="work_area_3">Select Area of Work 3:</label>
-            <input type="text" id="work_area_search_3" placeholder="Search for an area of work..." onkeyup="filterWorkAreas()">
-            <select name="work_area_3" id="work_area_3">
-                {% for work_area in work_areas %}
-                <option value="{{ work_area }}">{{ work_area }}</option>
-                {% endfor %}
-            </select>
-            <br><br>
+            <!-- Area of Work 2 with search -->
+            <div class="input-group">
+                <input type="text" id="work_area_search_2" placeholder="Search" onkeyup="showSuggestions('work_area_2', 'work_area_search_2')">
+                <select name="work_area_2" id="work_area_2">
+                    {% for work_area in work_areas %}
+                    <option value="{{ work_area }}">{{ work_area }}</option>
+                    {% endfor %}
+                </select>
+                <ul class="suggestions" id="suggestions_2"></ul>
+            </div>
+
+            <!-- Area of Work 3 with search -->
+            <div class="input-group">
+                <input type="text" id="work_area_search_3" placeholder="Search" onkeyup="showSuggestions('work_area_3', 'work_area_search_3')">
+                <select name="work_area_3" id="work_area_3">
+                    {% for work_area in work_areas %}
+                    <option value="{{ work_area }}">{{ work_area }}</option>
+                    {% endfor %}
+                </select>
+                <ul class="suggestions" id="suggestions_3"></ul>
+            </div>
 
             <button type="submit">Find Best Clinician</button>
         </form>
     </div>
 
     <script>
-        function filterWorkAreas() {
-            let input = document.getElementById('work_area_search_1');
-            let filter = input.value.toLowerCase();
-            let options = document.getElementById('work_area_1').getElementsByTagName('option');
+        function showSuggestions(dropdownId, searchId) {
+            const searchValue = document.getElementById(searchId).value.toLowerCase();
+            const dropdown = document.getElementById(dropdownId);
+            const suggestions = document.getElementById('suggestions_' + dropdownId.split('_')[2]);
+            const options = dropdown.getElementsByTagName('option');
 
+            // Clear previous suggestions
+            suggestions.innerHTML = '';
+
+            // Show suggestions if search value exists
+            if (searchValue) {
+                suggestions.style.display = 'block';  // Show suggestions only when there's a search input
+            } else {
+                suggestions.style.display = 'none';   // Hide when there's no search input
+            }
+
+            // Loop through options and filter suggestions
             for (let i = 0; i < options.length; i++) {
-                let txtValue = options[i].textContent || options[i].innerText;
-                if (txtValue.toLowerCase().indexOf(filter) > -1) {
-                    options[i].style.display = "";
-                } else {
-                    options[i].style.display = "none";
+                let optionValue = options[i].textContent || options[i].innerText;
+                if (optionValue.toLowerCase().includes(searchValue)) {
+                    const li = document.createElement('li');
+                    li.textContent = optionValue;
+                    li.onclick = () => {
+                        dropdown.value = options[i].value;
+                        document.getElementById(searchId).value = optionValue;  // Update search box with the chosen suggestion
+                        suggestions.innerHTML = '';  // Clear suggestions after selection
+                        suggestions.style.display = 'none';  // Hide suggestions after selection
+                    };
+                    suggestions.appendChild(li);
                 }
             }
         }
+
+        // Close suggestions when clicking outside
+        document.addEventListener('click', function(event) {
+            const suggestions = document.querySelectorAll('ul.suggestions');
+            suggestions.forEach(suggestion => {
+                if (!suggestion.contains(event.target)) {
+                    suggestion.style.display = 'none';  // Hide suggestions when clicking outside
+                }
+            });
+        });
     </script>
-
-<script>
-    function filterWorkAreas() {
-        let input = document.getElementById('work_area_search_2');
-        let filter = input.value.toLowerCase();
-        let options = document.getElementById('work_area_2').getElementsByTagName('option');
-
-        for (let i = 0; i < options.length; i++) {
-            let txtValue = options[i].textContent || options[i].innerText;
-            if (txtValue.toLowerCase().indexOf(filter) > -1) {
-                options[i].style.display = "";
-            } else {
-                options[i].style.display = "none";
-            }
-        }
-    }
-</script>
-
-<script>
-    function filterWorkAreas() {
-        let input = document.getElementById('work_area_search_3');
-        let filter = input.value.toLowerCase();
-        let options = document.getElementById('work_area_3').getElementsByTagName('option');
-
-        for (let i = 0; i < options.length; i++) {
-            let txtValue = options[i].textContent || options[i].innerText;
-            if (txtValue.toLowerCase().indexOf(filter) > -1) {
-                options[i].style.display = "";
-            } else {
-                options[i].style.display = "none";
-            }
-        }
-    }
-</script>
 
 </body>
 </html>

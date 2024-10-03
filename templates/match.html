@@ -6,77 +6,93 @@
     <title>Matching Results</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Montserrat', sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #f4f4f4;
+            background-color: #f0f0f5;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
+            overflow-x: hidden;
         }
 
         .container {
             background-color: white;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 50px;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
             text-align: center;
-            width: 60%;
+            width: 80%;
+            max-width: 1200px;
+            margin: 20px;
         }
 
         h1 {
-            color: #333;
+            color: #4A90E2;
+            font-size: 32px;
+            margin-bottom: 20px;
+            font-weight: 700;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
+            margin-top: 30px;
+            border-radius: 8px;
+            overflow: hidden;
+            background-color: #fff;
         }
 
         th, td {
-            padding: 12px;
+            padding: 16px;
             text-align: center;
+            font-size: 18px;
         }
 
         th {
-            background-color: #4CAF50;
-            color: white;
+            background-color: #E3F2FD;
+            color: #0D47A1;
+            font-weight: 600;
+        }
+        tr:nth-child(odd) {
+            background-color: #E8F5E9; /* Light mint green */
         }
 
         tr:nth-child(even) {
-            background-color: #f2f2f2;
+            background-color: #FAFAFA; /* Light gray */
         }
 
         tr:hover {
-            background-color: #ddd;
+            background-color: #E0F7FA; /* Light pastel green for hover */
         }
 
         td {
             font-size: 18px;
+            color: #333;
         }
 
         .result-table {
-            margin-top: 30px;
+            margin-top: 40px;
         }
 
         button {
             background-color: #4CAF50;
             color: white;
-            padding: 10px 20px;
+            padding: 12px 30px;
             border: none;
-            border-radius: 5px;
+            border-radius: 8px;
             cursor: pointer;
             font-size: 16px;
+            transition: background-color 0.3s ease;
         }
 
         button:hover {
-            background-color: #45a049;
+            background-color: #388E3C;
         }
 
         .back-button {
-            margin-top: 20px;
+            margin-top: 40px;
         }
 
         /* Tooltip styling */
@@ -88,66 +104,147 @@
 
         .tooltip .tooltiptext {
             visibility: hidden;
-            width: 220px;
+            width: 250px;
             background-color: #333;
             color: #fff;
             text-align: center;
-            border-radius: 5px;
+            border-radius: 8px;
             padding: 10px;
-            position: absolute;
-            z-index: 1;
-            bottom: 125%; /* Position above the text */
-            left: 50%;
-            margin-left: -110px; /* Center the tooltip */
+            position: fixed; /* Ensure it's relative to the viewport */
+            z-index: 1000; /* Bring it above other elements */
             opacity: 0;
-            transition: opacity 0.3s;
+            transition: opacity 0.3s ease;
         }
 
         .tooltip:hover .tooltiptext {
             visibility: visible;
             opacity: 1;
         }
+
+        select {
+            padding: 12px;
+            width: 65%;
+            border-radius: 10px;
+            border: 2px solid #ddd;
+            background-color: #fafafa;
+            font-size: 16px;
+            margin-bottom: 20px;
+            outline: none;
+        }
+
+        select:focus {
+            border-color: #4CAF50;
+        }
+
+        a {
+            color: #4CAF50;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
     </style>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="container">
-        <h1>Matching Results</h1>
+        <h1>Clinician Matching Results</h1>
 
-        <table class="result-table">
-            <thead>
-                <tr>
-                    <th>Clinician</th>
-                    <th>Age Group</th>
-                    <th>Area of Work</th>
-                    <th>Score</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for clinician, score in ranked_clinicians %}
-                <tr>
-                    <td class="tooltip">
-                        <a href="{{ url_for('clinician_details', clinician_name=clinician, area=area, age=age, intervention=intervention, work_area_1=work_areas[0], work_area_2=work_areas[1], work_area_3=work_areas[2]) }}">
-                            {{ clinician }}
-                        </a>
-                        <span class="tooltiptext">
-                            Age Group: {{ age }}<br>
-                            Area of Work: {{ work_areas[0] }}<br>
-                            Intervention: {{ intervention }}
-                        </span>
-                    </td>
-                    <td>{{ age }}</td>
-                    <td>{{ work_areas[0] }}</td> <!-- Display only the 1st Area of Work -->
-                    <td>{{ score }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        {% if message %}
+            <p>{{ message }}</p>
+        {% else %}
+            <table class="result-table">
+                <thead>
+                    <tr>
+                        <th>Clinician</th>
+                        <th>{{ age if age != "Select Age/ Client Type" else "Age Group" }} Score</th>
+                        <th>{{ work_areas[0] if work_areas[0] != "Select Area of Work" else "Area of Work 1" }} Score</th>
+                        <th>Overall Score</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for clinician, score in ranked_clinicians %}
+                    <tr>
+                        <td class="tooltip">
+                            <a href="{{ url_for('clinician_details', clinician_name=clinician, area=area, age=age, intervention=intervention, work_area_1=work_areas[0], work_area_2=work_areas[1], work_area_3=work_areas[2]) }}">
+                                {{ clinician }}
+                            </a>
+                            <span class="tooltiptext">
+                                {% if age != "Select Age/ Client Type" %}
+                                    {{ age }} Score: {{ detailed_scores[clinician]['age_score'] }}<br>
+                                {% endif %}
+                                {% if intervention != "Select Intervention" %}
+                                    {{ intervention }} Score: {{ detailed_scores[clinician]['intervention_score'] }}<br>
+                                {% endif %}
+                                {% if work_areas[0] != "Select Area of Work" %}
+                                    {{ work_areas[0] }} Score: {{ detailed_scores[clinician]['work_area_1_score'] }}<br>
+                                {% endif %}
+                                {% if work_areas[1] != "Select Area of Work" %}
+                                    {{ work_areas[1] }} Score: {{ detailed_scores[clinician]['work_area_2_score'] }}<br>
+                                {% endif %}
+                                {% if work_areas[2] != "Select Area of Work" %}
+                                    {{ work_areas[2] }} Score: {{ detailed_scores[clinician]['work_area_3_score'] }}
+                                {% endif %}
+                            </span>
+                        </td>
+                        <td>
+                            {% if age == "Select Age/ Client Type" %}
+                                N/A
+                            {% else %}
+                                {{ detailed_scores[clinician]['age_score'] }}
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if work_areas[0] == "Select Area of Work" %}
+                                N/A
+                            {% else %}
+                                {{ detailed_scores[clinician]['work_area_1_score'] }}
+                            {% endif %}
+                        </td>
+                        <td>{{ score }}</td> <!-- Overall score -->
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
 
-        <div class="back-button">
-            <a href="/">
-                <button type="button">Back to Selection</button>
-            </a>
-        </div>
+            <div class="back-button">
+                <a href="/">
+                    <button type="button">Back to Selection</button>
+                </a>
+            </div>
+        {% endif %}
     </div>
+
+    <script>
+        // Dynamically adjust the tooltip position to prevent it from being cut off
+        document.querySelectorAll('.tooltip').forEach(item => {
+            item.addEventListener('mouseover', event => {
+                const tooltip = item.querySelector('.tooltiptext');
+                const rect = item.getBoundingClientRect();
+                const tooltipRect = tooltip.getBoundingClientRect();
+                
+                // Center tooltip by default
+                tooltip.style.left = `${rect.left + rect.width / 2 - tooltipRect.width / 2}px`;
+                tooltip.style.top = `${rect.top - tooltipRect.height}px`;
+
+                // If the tooltip goes off the left edge of the screen
+                if (tooltipRect.left < 0) {
+                    tooltip.style.left = '0px';
+                }
+
+                // If the tooltip goes off the right edge of the screen
+                if (tooltipRect.right > window.innerWidth) {
+                    tooltip.style.left = `${window.innerWidth - tooltipRect.width}px`;
+                }
+
+                // If the tooltip goes above the top of the screen
+                if (tooltipRect.top < 0) {
+                    tooltip.style.top = `${rect.bottom}px`;  // Position below the element
+                }
+            });
+        });
+    </script>
 </body>
 </html>
