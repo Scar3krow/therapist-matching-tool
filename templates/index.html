@@ -29,33 +29,59 @@
             color: #333;
         }
 
-        select {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border-radius: 5px;
+        form {
+            margin-bottom: 20px;
         }
 
-        input[type="text"] {
-            width: 100%;
+        select, button {
+            width: 50%;
             padding: 10px;
-            margin-bottom: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
             border-radius: 5px;
-            border: 1px solid #ccc;
+            font-size: 16px;
         }
 
         button {
             background-color: #4CAF50;
             color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
             cursor: pointer;
-            font-size: 16px;
         }
 
         button:hover {
             background-color: #45a049;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        tr:hover {
+            background-color: #ddd;
+        }
+
+        td {
+            font-size: 18px;
+        }
+
+        .result-table {
+            margin-top: 30px;
         }
     </style>
 </head>
@@ -63,18 +89,57 @@
     <div class="container">
         <h1>Clinician Matching Tool</h1>
         <form action="/match" method="POST">
-            <!-- Other dropdowns for Area of Practice, Age, and Intervention -->
+            <!-- Area of Practice Dropdown -->
+            <select id="area" name="area">
+                {% for area in areas %}
+                <option value="{{ area }}">{{ area }}</option>
+                {% endfor %}
+            </select>
+            <br>
 
-            <!-- Searchable Area of Work -->
+            <!-- Age/Client Type Dropdown -->
+            <select id="age" name="age">
+                {% for age in ages %}
+                <option value="{{ age }}">{{ age }}</option>
+                {% endfor %}
+            </select>
+            <br>
+
+            <!-- Intervention Dropdown -->
+            <select id="intervention" name="intervention">
+                {% for intervention in interventions %}
+                <option value="{{ intervention }}">{{ intervention }}</option>
+                {% endfor %}
+            </select>
+            <br>
+
+            <!-- Area of Work Dropdowns -->
             <label for="work_area_1">Select Area of Work 1:</label>
-            <input type="text" id="work_area_search" placeholder="Search for an area of work..." onkeyup="filterWorkAreas()">
+            <input type="text" id="work_area_search_1" placeholder="Search for an area of work..." onkeyup="filterWorkAreas()">
             <select name="work_area_1" id="work_area_1">
                 {% for work_area in work_areas %}
                 <option value="{{ work_area }}">{{ work_area }}</option>
                 {% endfor %}
             </select>
+            <br><br>
+        
+            <label for="work_area_2">Select Area of Work 2:</label>
+            <input type="text" id="work_area_search_2" placeholder="Search for an area of work..." onkeyup="filterWorkAreas()">
+            <select name="work_area_2" id="work_area_2">
+                {% for work_area in work_areas %}
+                <option value="{{ work_area }}">{{ work_area }}</option>
+                {% endfor %}
+            </select>
+            <br><br>
 
-            <!-- Add the other work areas if needed -->
+            <label for="work_area_3">Select Area of Work 3:</label>
+            <input type="text" id="work_area_search_3" placeholder="Search for an area of work..." onkeyup="filterWorkAreas()">
+            <select name="work_area_3" id="work_area_3">
+                {% for work_area in work_areas %}
+                <option value="{{ work_area }}">{{ work_area }}</option>
+                {% endfor %}
+            </select>
+            <br><br>
 
             <button type="submit">Find Best Clinician</button>
         </form>
@@ -82,7 +147,7 @@
 
     <script>
         function filterWorkAreas() {
-            let input = document.getElementById('work_area_search');
+            let input = document.getElementById('work_area_search_1');
             let filter = input.value.toLowerCase();
             let options = document.getElementById('work_area_1').getElementsByTagName('option');
 
@@ -96,5 +161,40 @@
             }
         }
     </script>
+
+<script>
+    function filterWorkAreas() {
+        let input = document.getElementById('work_area_search_2');
+        let filter = input.value.toLowerCase();
+        let options = document.getElementById('work_area_2').getElementsByTagName('option');
+
+        for (let i = 0; i < options.length; i++) {
+            let txtValue = options[i].textContent || options[i].innerText;
+            if (txtValue.toLowerCase().indexOf(filter) > -1) {
+                options[i].style.display = "";
+            } else {
+                options[i].style.display = "none";
+            }
+        }
+    }
+</script>
+
+<script>
+    function filterWorkAreas() {
+        let input = document.getElementById('work_area_search_3');
+        let filter = input.value.toLowerCase();
+        let options = document.getElementById('work_area_3').getElementsByTagName('option');
+
+        for (let i = 0; i < options.length; i++) {
+            let txtValue = options[i].textContent || options[i].innerText;
+            if (txtValue.toLowerCase().indexOf(filter) > -1) {
+                options[i].style.display = "";
+            } else {
+                options[i].style.display = "none";
+            }
+        }
+    }
+</script>
+
 </body>
 </html>
