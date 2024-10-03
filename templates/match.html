@@ -79,10 +79,33 @@
             margin-top: 20px;
         }
 
-        .message {
-            color: red;
-            font-size: 20px;
-            margin-top: 20px;
+        /* Tooltip styling */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+        }
+
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 220px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 5px;
+            padding: 10px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%; /* Position above the text */
+            left: 50%;
+            margin-left: -110px; /* Center the tooltip */
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
         }
     </style>
 </head>
@@ -90,34 +113,39 @@
     <div class="container">
         <h1>Matching Results</h1>
 
-        {% if message %}
-            <p class="message">{{ message }}</p>
-        {% else %}
-            <table class="result-table">
-                <thead>
-                    <tr>
-                        <th>Clinician</th>
-                        <th>Score</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for clinician, score in ranked_clinicians %}
-                    <tr>
-                        <td>
-                            <a href="{{ url_for('clinician_details', clinician_name=clinician, area=area, age=age, intervention=intervention, work_area_1=work_areas[0], work_area_2=work_areas[1], work_area_3=work_areas[2]) }}">
-                                {{ clinician }}
-                            </a>
-                        </td>
-                        <td>{{ score }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        {% endif %}
+        <table class="result-table">
+            <thead>
+                <tr>
+                    <th>Clinician</th>
+                    <th>Age Group</th>
+                    <th>Area of Work</th>
+                    <th>Score</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for clinician, score in ranked_clinicians %}
+                <tr>
+                    <td class="tooltip">
+                        <a href="{{ url_for('clinician_details', clinician_name=clinician, area=area, age=age, intervention=intervention, work_area_1=work_areas[0], work_area_2=work_areas[1], work_area_3=work_areas[2]) }}">
+                            {{ clinician }}
+                        </a>
+                        <span class="tooltiptext">
+                            Age Group: {{ age }}<br>
+                            Area of Work: {{ work_areas[0] }}<br>
+                            Intervention: {{ intervention }}
+                        </span>
+                    </td>
+                    <td>{{ age }}</td>
+                    <td>{{ work_areas[0] }}</td> <!-- Display only the 1st Area of Work -->
+                    <td>{{ score }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
 
         <div class="back-button">
             <a href="/">
-                <button type="button">Back to Home</button>
+                <button type="button">Back to Selection</button>
             </a>
         </div>
     </div>
