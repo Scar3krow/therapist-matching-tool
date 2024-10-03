@@ -9,7 +9,7 @@ app.secret_key = 'your_secret_key'  # Needed for session to work
 # Load the Google Sheets data from the CSV export link
 def load_excel_data():
     # Google Sheets CSV export link
-    file_url = "https://docs.google.com/spreadsheets/d/1leIVHKD7O2rIXeTTT7wDMht_USxL9X2U/export?format=csv"
+    file_url = "https://docs.google.com/spreadsheets/d/1vJdL4bOj6O5i1M3ONl-4RCggTXpdXAi3pK6XoatPO_c/export?format=csv"
 
     # Request the CSV file from Google Sheets
     response = requests.get(file_url)
