@@ -139,10 +139,10 @@
                 </select>
             </div>
 
-            <!-- Intervention Dropdown -->
+            <!-- Intervention Dropdown (initially adult list) -->
             <div class="input-group">
                 <select id="intervention" name="intervention">
-                    {% for intervention in interventions %}
+                    {% for intervention in interventions_adult %}
                     <option value="{{ intervention }}">{{ intervention }}</option>
                     {% endfor %}
                 </select>
@@ -152,7 +152,7 @@
             <div class="input-group">
                 <input type="text" id="work_area_search_1" placeholder="Search" onkeyup="showSuggestions('work_area_1', 'work_area_search_1')">
                 <select name="work_area_1" id="work_area_1">
-                    {% for work_area in work_areas %}
+                    {% for work_area in work_areas_adult %}
                     <option value="{{ work_area }}">{{ work_area }}</option>
                     {% endfor %}
                 </select>
@@ -163,7 +163,7 @@
             <div class="input-group">
                 <input type="text" id="work_area_search_2" placeholder="Search" onkeyup="showSuggestions('work_area_2', 'work_area_search_2')">
                 <select name="work_area_2" id="work_area_2">
-                    {% for work_area in work_areas %}
+                    {% for work_area in work_areas_adult %}
                     <option value="{{ work_area }}">{{ work_area }}</option>
                     {% endfor %}
                 </select>
@@ -174,7 +174,7 @@
             <div class="input-group">
                 <input type="text" id="work_area_search_3" placeholder="Search" onkeyup="showSuggestions('work_area_3', 'work_area_search_3')">
                 <select name="work_area_3" id="work_area_3">
-                    {% for work_area in work_areas %}
+                    {% for work_area in work_areas_adult %}
                     <option value="{{ work_area }}">{{ work_area }}</option>
                     {% endfor %}
                 </select>
@@ -185,6 +185,7 @@
         </form>
     </div>
 
+    <!-- existing suggestion script -->
     <script>
         function showSuggestions(dropdownId, searchId) {
             const searchValue = document.getElementById(searchId).value.toLowerCase();
@@ -230,5 +231,58 @@
         });
     </script>
 
+    <!-- adult/child swap logic -->
+    <script>
+    /* ------------------------------------------------------------------ */
+    /* 1.  Option lists injected from Flask                               */
+    const adultInterventions = {{ interventions_adult|tojson|safe }};
+    const childInterventions = {{ interventions_child|tojson|safe }};
+    const adultWorkAreas    = {{ work_areas_adult|tojson|safe }};
+    const childWorkAreas    = {{ work_areas_child|tojson|safe }};
+
+    /* 2. Age choices that trigger child lists                            */
+    const childAges = [
+        "Young Adult (16 - 19)",
+        "Adolescent (12 - 15)",
+        "Child (6 - 11)",
+        "Child (<6)",
+        "Parenting Support",
+        "NDIS (Child)"
+    ];
+
+    /* 3. Helper to refill a <select> element                             */
+    function populateSelect(id, options) {
+        const sel = document.getElementById(id);
+        sel.innerHTML = "";
+        options.forEach(opt => {
+            const o = document.createElement("option");
+            o.value = o.textContent = opt;
+            sel.appendChild(o);
+        });
+    }
+
+    /* 4. Swap lists on age change                                        */
+    function maybeSwapLists() {
+        const isChild = childAges.includes(document.getElementById("age").value);
+
+        // intervention dropdown
+        populateSelect("intervention", isChild ? childInterventions : adultInterventions);
+        document.getElementById("intervention").selectedIndex = 0;
+
+        // work area dropdowns + reset searches
+        ["work_area_1","work_area_2","work_area_3"].forEach(id => {
+            populateSelect(id, isChild ? childWorkAreas : adultWorkAreas);
+            document.getElementById(id).selectedIndex = 0;
+            const n = id.split('_')[2]; // 1,2,3
+            document.getElementById(`work_area_search_${n}`).value = "";
+            document.getElementById(`suggestions_${n}`).innerHTML = "";
+        });
+    }
+
+    /* 5. Bind & initialise                                              */
+    document.getElementById("age").addEventListener("change", maybeSwapLists);
+    maybeSwapLists();
+    /* ------------------------------------------------------------------ */
+    </script>
 </body>
 </html>

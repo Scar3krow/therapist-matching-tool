@@ -8,56 +8,57 @@ app.secret_key = 'your_secret_key'  # Needed for session to work
 
 # Load the Google Sheets data from the CSV export link
 def load_excel_data():
-    # Google Sheets CSV export link
-    file_url = "https://docs.google.com/spreadsheets/d/1vJdL4bOj6O5i1M3ONl-4RCggTXpdXAi3pK6XoatPO_c/export?format=csv"
-
-    # Request the CSV file from Google Sheets
+    file_url = ("https://docs.google.com/spreadsheets/d/"
+                "1vJdL4bOj6O5i1M3ONl-4RCggTXpdXAi3pK6XoatPO_c/export?format=csv")
     response = requests.get(file_url)
+    if response.status_code != 200:
+        raise Exception(f"Failed to download sheet: {response.status_code}")
 
-    if response.status_code == 200:
-        # Read the CSV file into a pandas DataFrame directly from text using StringIO
-        df = pd.read_csv(StringIO(response.text))
-    else:
-        raise Exception(f"Failed to download the file from Google Sheets: {response.status_code}")
+    df = pd.read_csv(StringIO(response.text))
 
-    # Define section headers that indicate the start of each section
+    # NEW ────────────────────────────────────────────────────────────────────
     section_headers = {
-        'AREA OF PRACTICE': [],
-        'AGE/ CLIENT TYPE': [],
-        'INTERVENTIONS': [],
-        'AREAS OF WORK': []
+        'AREA OF PRACTICE':             [],
+        'AGE/ CLIENT TYPE':             [],
+        'INTERVENTIONS':                [],
+        'AREAS OF WORK':                [],
+        'INTERVENTIONS (CHILD)':        [],   # <─ added
+        'AREAS OF WORK (CHILD)':        []    # <─ added
     }
+    # ────────────────────────────────────────────────────────────────────────
 
-    # Loop through the dataset and categorize rows under each section
-    current_category = None
-    for i, row in df.iterrows():
+    current_section = None
+    for _, row in df.iterrows():
         first_cell = str(row['CLINICIAN']).strip()
-
-        # Check if the row contains a section header
         if first_cell in section_headers:
-            current_category = first_cell
+            current_section = first_cell
             continue
-        
-        # Assign rows to the current category
-        if current_category and not pd.isna(first_cell):
-            section_headers[current_category].append(first_cell)
+        if current_section and first_cell:
+            section_headers[current_section].append(first_cell)
 
-    # Extract sections from the dictionary
-    area_of_practice = section_headers['AREA OF PRACTICE']
-    age_client_type = section_headers['AGE/ CLIENT TYPE']
-    interventions = section_headers['INTERVENTIONS']
-    areas_of_work = section_headers['AREAS OF WORK']
-    
-    # Extract clinician names (columns)
-    clinicians = df.columns[1:].tolist()  # Skip the first "CLINICIAN" column
-    
-    # Add default options at the beginning
-    area_of_practice.insert(0, "Select Area of Practice")
-    age_client_type.insert(0, "Select Age/ Client Type")
-    interventions.insert(0, "Select Intervention")
-    areas_of_work.insert(0, "Select Area of Work")
+    # unpack
+    area_of_practice       = section_headers['AREA OF PRACTICE']
+    age_client_type        = section_headers['AGE/ CLIENT TYPE']
+    interventions_adult    = section_headers['INTERVENTIONS']
+    interventions_child    = section_headers['INTERVENTIONS (CHILD)']   # new
+    work_areas_adult       = section_headers['AREAS OF WORK']
+    work_areas_child       = section_headers['AREAS OF WORK (CHILD)']    # new
+    clinicians             = df.columns[1:].tolist()
 
-    return df, area_of_practice, age_client_type, interventions, areas_of_work, clinicians
+    # add defaults
+    def _add_default(lst, label): lst.insert(0, label) ; return lst
+    area_of_practice    = _add_default(area_of_practice,    "Select Area of Practice")
+    age_client_type     = _add_default(age_client_type,     "Select Age/ Client Type")
+    interventions_adult = _add_default(interventions_adult, "Select Intervention")
+    interventions_child = _add_default(interventions_child, "Select Intervention")
+    work_areas_adult    = _add_default(work_areas_adult,    "Select Area of Work")
+    work_areas_child    = _add_default(work_areas_child,    "Select Area of Work")
+
+    # return EVERYTHING we’ll need on the front end
+    return (df, area_of_practice, age_client_type,
+            interventions_adult, interventions_child,
+            work_areas_adult, work_areas_child,
+            clinicians)
 
 # Calculate clinician ratings based on selected categories
 def calculate_ratings(df, selected_area, selected_age, selected_intervention, selected_work_areas, clinicians):
@@ -142,13 +143,17 @@ def calculate_ratings(df, selected_area, selected_age, selected_intervention, se
 @app.route('/')
 def index():
     # Load the dynamic data from Excel
-    df, area_of_practice, age_client_type, interventions, areas_of_work, clinicians = load_excel_data()
-    
-    return render_template('index.html', 
-                           areas=area_of_practice, 
-                           ages=age_client_type, 
-                           interventions=interventions,
-                           work_areas=areas_of_work)
+    (df, areas, ages,
+    interventions_adult, interventions_child,
+    work_areas_adult, work_areas_child,
+    clinicians) = load_excel_data()
+
+    return render_template('index.html',
+        areas=areas, ages=ages,
+        interventions_adult=interventions_adult,
+        interventions_child=interventions_child,
+        work_areas_adult=work_areas_adult,
+        work_areas_child=work_areas_child)
 
 @app.route('/match', methods=['GET', 'POST'])
 def match():
@@ -175,7 +180,10 @@ def match():
         selected_work_areas = session.get('selected_work_areas', ['Select Area of Work', 'Select Area of Work', 'Select Area of Work'])
 
     # Load the data and calculate the clinician ratings
-    df, area_of_practice, age_client_type, interventions, areas_of_work, clinicians = load_excel_data()
+    (df, _areas, _ages,
+ interventions_adult, interventions_child,
+ work_areas_adult, work_areas_child,
+ clinicians) = load_excel_data()
     ranked_clinicians, detailed_scores = calculate_ratings(df, selected_area, selected_age, selected_intervention, selected_work_areas, clinicians)
 
     if not ranked_clinicians:
