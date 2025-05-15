@@ -97,8 +97,6 @@ def calculate_ratings(df, selected_area, selected_age, selected_intervention, se
             area_score = df.iloc[area_index][clinician]
             if area_score == 0:
                 continue  # Exclude clinician if Area of Practice score is 0
-            score_sum += area_score
-            category_count += 1
 
         # Check and add score for selected age/client type: Exclude clinician if score is 0
         if age_index is not None:
